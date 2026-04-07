@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # ==========================================
 # 0. AUTH & PROXY MANAGEMENT ("PROFILE SWAPPER")
 # ==========================================
@@ -7,7 +9,6 @@ STATE_FLAG="$HOME/.claude-rotator.active"
 PROXY_PID=""
 
 hide_web_token() {
-    # Only swap if we aren't already in proxy mode
     if [ ! -f "$STATE_FLAG" ]; then
         echo "🛡️  Switching to Proxy Profile..."
         
@@ -15,29 +16,31 @@ hide_web_token() {
         [ -f "$AUTH_FILE" ] && mv "$AUTH_FILE" "$AUTH_FILE.real"
         [ -d "$AUTH_DIR" ] && mv "$AUTH_DIR" "$AUTH_DIR.real"
 
-        # 2. Load the Proxy memory (so it remembers the dummy key)
-        [ -f "$AUTH_FILE.proxy" ] && mv "$AUTH_FILE.proxy" "$AUTH_FILE"
-        [ -d "$AUTH_DIR.proxy" ] && mv "$AUTH_DIR.proxy" "$AUTH_DIR"
+        # 2. Load the Proxy memory OR create a fake one to skip the Yes/No prompt
+        if [ -f "$AUTH_FILE.proxy" ]; then
+            mv "$AUTH_FILE.proxy" "$AUTH_FILE"
+            [ -d "$AUTH_DIR.proxy" ] && mv "$AUTH_DIR.proxy" "$AUTH_DIR"
+        else
+            # Inject a fake pre-approved key so Claude bypasses login AND the prompt!
+            echo '{"customApiKey":"sk-ant-dummy"}' > "$AUTH_FILE"
+        fi
 
-        # Mark that we are currently in proxy mode
         touch "$STATE_FLAG"
     fi
 }
 
 restore_web_token() {
-    # Only restore if we are currently in proxy mode
     if [ -f "$STATE_FLAG" ]; then
         echo "🔓 Restoring Official Claude session..."
         
-        # 1. Save the current state (which now includes your "Yes" approval)
+        # 1. Save current proxy state
         [ -f "$AUTH_FILE" ] && mv "$AUTH_FILE" "$AUTH_FILE.proxy"
         [ -d "$AUTH_DIR" ] && mv "$AUTH_DIR" "$AUTH_DIR.proxy"
 
-        # 2. Restore the official Anthropic login
+        # 2. Restore official Anthropic login
         [ -f "$AUTH_FILE.real" ] && mv "$AUTH_FILE.real" "$AUTH_FILE"
         [ -d "$AUTH_DIR.real" ] && mv "$AUTH_DIR.real" "$AUTH_DIR"
 
-        # Clear the proxy flag
         rm -f "$STATE_FLAG"
     fi
 }

@@ -3,17 +3,14 @@
 echo "🚀 Installing Claude Code Multi-Provider Rotator..."
 echo "==================================================="
 
-# 1. Create a hidden installation directory
 INSTALL_DIR="$HOME/.claude-rotator"
 mkdir -p "$INSTALL_DIR"
 
-# 2. Download the main script directly from your GitHub
-# (Note: Replace 'yourusername' and 'yourrepo' with your actual GitHub details)
 echo "📥 Downloading core scripts..."
+# FIXED: Added /main/ to the URL path
 curl -sSL "https://raw.githubusercontent.com/BheeshamKS/ClaudeCode-Model-Rotator/main/rotator.sh" -o "$INSTALL_DIR/rotator.sh"
 chmod +x "$INSTALL_DIR/rotator.sh"
 
-# 3. Ask the user for their API key so they don't have to make a .env file manually
 echo ""
 echo "🔑 Let's set up your OpenRouter API Key."
 echo "   (You can get a free one at https://openrouter.ai/keys)"
@@ -22,7 +19,6 @@ read -p "Paste your OPENROUTER_API_KEY: " user_api_key
 echo "OPENROUTER_API_KEY=\"$user_api_key\"" > "$INSTALL_DIR/.env"
 echo "✅ Key saved securely."
 
-# 4. Automate the Python Virtual Environment & LiteLLM installation
 echo ""
 echo "📦 Installing LiteLLM Proxy in the background (this may take a few minutes)..."
 python3 -m venv "$HOME/.litellm_env"
@@ -30,7 +26,6 @@ python3 -m venv "$HOME/.litellm_env"
 "$HOME/.litellm_env/bin/pip" install 'litellm[proxy]' > /dev/null 2>&1
 echo "✅ Proxy installed successfully."
 
-# 5. Create a global command alias in the user's bash profile
 BASH_RC="$HOME/.bashrc"
 if ! grep -q "alias claude-rotator=" "$BASH_RC"; then
     echo "alias claude-rotator='$INSTALL_DIR/rotator.sh'" >> "$BASH_RC"
