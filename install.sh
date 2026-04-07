@@ -9,7 +9,7 @@ mkdir -p "$INSTALL_DIR"
 
 # 2. Download the main script directly from GitHub
 echo "📥 Downloading core scripts..."
-curl -sSL "https://raw.githubusercontent.com/BheeshamKS/ClaudeCode-Model-Rotator/main/rotator.sh" -o "$INSTALL_DIR/rotator.sh"
+curl -sSL "https://raw.githubusercontent.com/BheeshamKS/ClaudeCode-Model-Rotator/testing/rotator.sh" -o "$INSTALL_DIR/rotator.sh"
 chmod +x "$INSTALL_DIR/rotator.sh"
 
 # 3. Ask the user for their API key
