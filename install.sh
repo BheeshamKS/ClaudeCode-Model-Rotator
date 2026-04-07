@@ -21,24 +21,27 @@ read -p "Paste your OPENROUTER_API_KEY: " user_api_key </dev/tty
 echo "OPENROUTER_API_KEY=\"$user_api_key\"" > "$INSTALL_DIR/.env"
 echo "✅ Key saved securely."
 
-# 4. Automate Ollama Installation (Default: YES)
+# 4. Smart Ollama Installation (Check first, Default YES)
 echo ""
-echo "🦙 Do you want to install Ollama? (Highly Recommended)"
-echo "   Ollama allows you to run high-speed cloud models for free."
-echo "   It provides generous free usage limits that automatically reset."
-# Notice the capital [Y/n] indicating Yes is the default
-read -p "Install Ollama now? [Y/n]: " install_ollama </dev/tty
-
-# If the user just presses Enter, force the variable to "Y"
-install_ollama=${install_ollama:-Y}
-
-if [[ "$install_ollama" =~ ^[Yy]$ ]]; then
-    echo "📦 Downloading and installing Ollama..."
-    echo "   (Note: Your system may ask for your password to set up the Ollama background service)"
-    curl -fsSL https://ollama.com/install.sh | sh
-    echo "✅ Ollama installed successfully."
+if command -v ollama &> /dev/null; then
+    echo "✅ Ollama is already installed on this system. Skipping..."
 else
-    echo "⏭️  Skipping Ollama installation."
+    echo "🦙 Ollama is not installed. (Highly Recommended)"
+    echo "   Ollama allows you to run high-speed cloud models for free."
+    echo "   It provides generous free usage limits that automatically reset."
+    read -p "Install Ollama now? [Y/n]: " install_ollama </dev/tty
+    
+    # If the user just presses Enter, force the variable to "Y"
+    install_ollama=${install_ollama:-Y}
+    
+    if [[ "$install_ollama" =~ ^[Yy]$ ]]; then
+        echo "📦 Downloading and installing Ollama..."
+        echo "   (Note: Your system may ask for your password to set up the Ollama background service)"
+        curl -fsSL https://ollama.com/install.sh | sh
+        echo "✅ Ollama installed successfully."
+    else
+        echo "⏭️  Skipping Ollama installation."
+    fi
 fi
 
 # 5. Automate the Python Virtual Environment & LiteLLM proxy
