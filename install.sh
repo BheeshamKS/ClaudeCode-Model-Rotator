@@ -10,7 +10,7 @@ mkdir -p "$INSTALL_DIR"
 # 2. Download the main script directly from your GitHub
 # (Note: Replace 'yourusername' and 'yourrepo' with your actual GitHub details)
 echo "📥 Downloading core scripts..."
-curl -sSL "https://raw.githubusercontent.com/yourusername/yourrepo/main/rotator.sh" -o "$INSTALL_DIR/rotator.sh"
+curl -sSL "https://github.com/BheeshamKS/ClaudeCode-Model-Rotator/rotator.sh" -o "$INSTALL_DIR/rotator.sh"
 chmod +x "$INSTALL_DIR/rotator.sh"
 
 # 3. Ask the user for their API key so they don't have to make a .env file manually
