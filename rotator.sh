@@ -41,15 +41,8 @@ fi
 export OPENROUTER_API_KEY=$(echo "$OPENROUTER_API_KEY" | tr -d '"' | tr -d "'")
 
 # ==========================================
-# 2. STATIC MODELS
+# 2. OPENROUTER MODELS
 # ==========================================
-CLOUD_OLLAMA=(
-    "qwen3.5:cloud"
-    "kimi-k2.5:cloud"
-    "glm-5:cloud"
-    "minimax-m2.7:cloud"
-)
-
 OPENROUTER_MODELS=(
     "qwen/qwen3.6-plus:free"
     "nvidia/nemotron-3-super-120b-a12b:free"
@@ -64,7 +57,7 @@ clear
 echo "🔄 Claude Code TUI - Multi-Provider Rotator"
 echo "-------------------------------------------"
 echo "1) Official Claude (Anthropic Web)"
-echo "2) Ollama (Local & Cloud Models)"
+echo "2) Ollama (Native Launcher)"
 echo "3) OpenRouter (via LiteLLM Proxy)"
 echo "4) 🛠️  Clear Custom API Keys (Restore Web Login)"
 echo "5) Exit"
@@ -84,31 +77,13 @@ case $provider_choice in
             exit 1
         fi
 
-        # DYNAMICALLY FETCH LOCAL MODELS
-        # This grabs the names from 'ollama list', skips the header, and puts them in an array
-        mapfile -t LOCAL_MODELS < <(ollama list | awk 'NR>1 {print $1}')
+        echo -e "\n🦙 Passing control to Ollama Native Launcher..."
+        clear_custom_keys
+        unset ANTHROPIC_BASE_URL
+        unset ANTHROPIC_API_KEY
         
-        # Combine Cloud and Local lists
-        ALL_OLLAMA=("${CLOUD_OLLAMA[@]}" "${LOCAL_MODELS[@]}")
-
-        echo -e "\n🦙 Available Ollama Models (Cloud + Local):"
-        select model in "${ALL_OLLAMA[@]}"; do
-            if [[ -n $model ]]; then
-                echo -e "\n-------------------------------------------"
-                echo "💻 Command: ollama launch claude --model $model"
-                echo "-------------------------------------------"
-                
-                clear_custom_keys
-                unset ANTHROPIC_BASE_URL
-                unset ANTHROPIC_API_KEY
-                
-                # Execute the launch
-                ollama launch claude --model "$model"
-                break
-            else
-                echo "Invalid selection."
-            fi
-        done
+        # This runs the official Ollama command which provides its own model list
+        ollama launch claude
         ;;
     3)
         echo -e "\n🌐 Available OpenRouter Models:"
