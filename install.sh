@@ -12,7 +12,7 @@ echo "📥 Downloading core scripts..."
 curl -sSL "https://raw.githubusercontent.com/BheeshamKS/ClaudeCode-Model-Rotator/main/rotator.sh" -o "$INSTALL_DIR/rotator.sh"
 chmod +x "$INSTALL_DIR/rotator.sh"
 
-# 3. Ask the user for their API key (Works perfectly over curl)
+# 3. Ask the user for their API key
 echo ""
 echo "🔑 Let's set up your OpenRouter API Key."
 echo "   (You can get a free one at https://openrouter.ai/keys)"
@@ -21,7 +21,22 @@ read -p "Paste your OPENROUTER_API_KEY: " user_api_key </dev/tty
 echo "OPENROUTER_API_KEY=\"$user_api_key\"" > "$INSTALL_DIR/.env"
 echo "✅ Key saved securely."
 
-# 4. Automate the Python Virtual Environment & LiteLLM installation
+# 4. Automate Ollama Installation (NEW)
+echo ""
+echo "🦙 Do you want to install Ollama?"
+echo "   (This is required if you want to use the local/cloud models in Option 2)"
+read -p "Install Ollama now? [y/N]: " install_ollama </dev/tty
+
+if [[ "$install_ollama" =~ ^[Yy]$ ]]; then
+    echo "📦 Downloading and installing Ollama..."
+    echo "   (Note: Your system may ask for your password to set up the Ollama background service)"
+    curl -fsSL https://ollama.com/install.sh | sh
+    echo "✅ Ollama installed successfully."
+else
+    echo "⏭️  Skipping Ollama installation."
+fi
+
+# 5. Automate the Python Virtual Environment & LiteLLM proxy
 echo ""
 echo "📦 Installing LiteLLM Proxy in the background (this may take a few minutes)..."
 python3 -m venv "$HOME/.litellm_env"
@@ -29,7 +44,7 @@ python3 -m venv "$HOME/.litellm_env"
 "$HOME/.litellm_env/bin/pip" install 'litellm[proxy]' > /dev/null 2>&1
 echo "✅ Proxy installed successfully."
 
-# 5. Create a global command alias in the user's bash profile
+# 6. Create a global command alias in the user's bash profile
 BASH_RC="$HOME/.bashrc"
 if ! grep -q "alias claude-rotator=" "$BASH_RC"; then
     echo "alias claude-rotator='$INSTALL_DIR/rotator.sh'" >> "$BASH_RC"

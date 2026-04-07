@@ -82,6 +82,15 @@ case $provider_choice in
         claude
         ;;
     2)
+        # SAFETY CHECK: Is Ollama actually installed?
+        if ! command -v ollama &> /dev/null; then
+            echo -e "\n❌ Ollama is not installed on this machine."
+            echo "   To use local/cloud models, please install Ollama first:"
+            echo "   👉 Download: https://ollama.com/download"
+            echo -e "\nExiting."
+            exit 1
+        fi
+
         echo -e "\n☁️  Available Ollama Cloud Models:"
         select model in "${OLLAMA_MODELS[@]}"; do
             if [[ -n $model ]]; then
