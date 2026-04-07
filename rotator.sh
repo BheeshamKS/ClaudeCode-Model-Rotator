@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ==========================================
-# 0. AUTH & PROXY MANAGEMENT (CLEAN SLATE EVERY TIME)
+# 0. AUTH & PROXY MANAGEMENT
 # ==========================================
 AUTH_FILE="$HOME/.claude.json"
 AUTH_HIDDEN="$HOME/.claude.json.hidden"
@@ -33,6 +33,7 @@ trap cleanup EXIT
 # ==========================================
 # 1. LOAD API KEYS
 # ==========================================
+# Load from the installer's .env file
 if [ -f "$HOME/.claude-rotator/.env" ]; then
     set -a; source "$HOME/.claude-rotator/.env"; set +a
 else
