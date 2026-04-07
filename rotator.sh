@@ -5,9 +5,6 @@
 # ==========================================
 PROXY_PID=""
 
-# SURGICAL STRIKE: Instead of hiding the whole config file (which causes Claude 
-# to delete the OS Keychain token), we use Node.js to surgically delete ONLY 
-# the dummy key right before you want to use the Official Web Login.
 clear_custom_keys() {
     if command -v node &> /dev/null; then
         node -e '
@@ -34,7 +31,6 @@ trap cleanup EXIT
 # ==========================================
 # 1. LOAD API KEYS
 # ==========================================
-# Load from the installer's .env file
 if [ -f "$HOME/.claude-rotator/.env" ]; then
     set -a; source "$HOME/.claude-rotator/.env"; set +a
 else
@@ -45,9 +41,9 @@ fi
 export OPENROUTER_API_KEY=$(echo "$OPENROUTER_API_KEY" | tr -d '"' | tr -d "'")
 
 # ==========================================
-# 2. MODELS
+# 2. STATIC MODELS
 # ==========================================
-OLLAMA_MODELS=(
+CLOUD_OLLAMA=(
     "qwen3.5:cloud"
     "kimi-k2.5:cloud"
     "glm-5:cloud"
@@ -68,7 +64,7 @@ clear
 echo "🔄 Claude Code TUI - Multi-Provider Rotator"
 echo "-------------------------------------------"
 echo "1) Official Claude (Anthropic Web)"
-echo "2) Ollama Cloud"
+echo "2) Ollama (Local & Cloud Models)"
 echo "3) OpenRouter (via LiteLLM Proxy)"
 echo "4) 🛠️  Clear Custom API Keys (Restore Web Login)"
 echo "5) Exit"
@@ -77,29 +73,36 @@ read -p "Select Provider [1-5]: " provider_choice
 case $provider_choice in
     1)
         echo -e "\n🚀 Launching Official Claude..."
-        # Surgically remove the dummy key so it falls back to your OS Keychain web login
         clear_custom_keys
         unset ANTHROPIC_BASE_URL
         unset ANTHROPIC_API_KEY
         claude
         ;;
     2)
-        # SAFETY CHECK: Is Ollama actually installed?
         if ! command -v ollama &> /dev/null; then
-            echo -e "\n❌ Ollama is not installed on this machine."
-            echo "   To use local/cloud models, please install Ollama first:"
-            echo "   👉 Download: https://ollama.com/download"
-            echo -e "\nExiting."
+            echo -e "\n❌ Ollama is not installed."
             exit 1
         fi
 
-        echo -e "\n☁️  Available Ollama Cloud Models:"
-        select model in "${OLLAMA_MODELS[@]}"; do
+        # DYNAMICALLY FETCH LOCAL MODELS
+        # This grabs the names from 'ollama list', skips the header, and puts them in an array
+        mapfile -t LOCAL_MODELS < <(ollama list | awk 'NR>1 {print $1}')
+        
+        # Combine Cloud and Local lists
+        ALL_OLLAMA=("${CLOUD_OLLAMA[@]}" "${LOCAL_MODELS[@]}")
+
+        echo -e "\n🦙 Available Ollama Models (Cloud + Local):"
+        select model in "${ALL_OLLAMA[@]}"; do
             if [[ -n $model ]]; then
-                echo -e "\n🚀 Launching Ollama Cloud: $model"
+                echo -e "\n-------------------------------------------"
+                echo "💻 Command: ollama launch claude --model $model"
+                echo "-------------------------------------------"
+                
                 clear_custom_keys
                 unset ANTHROPIC_BASE_URL
                 unset ANTHROPIC_API_KEY
+                
+                # Execute the launch
                 ollama launch claude --model "$model"
                 break
             else
