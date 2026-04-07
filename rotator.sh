@@ -1,47 +1,24 @@
 #!/bin/bash
 
 # ==========================================
-# 0. AUTH & PROXY MANAGEMENT ("PROFILE SWAPPER")
+# 0. AUTH & PROXY MANAGEMENT (CLEAN SLATE EVERY TIME)
 # ==========================================
 AUTH_FILE="$HOME/.claude.json"
+AUTH_HIDDEN="$HOME/.claude.json.hidden"
 AUTH_DIR="$HOME/.claude"
-STATE_FLAG="$HOME/.claude-rotator.active"
+AUTH_DIR_HIDDEN="$HOME/.claude.hidden"
 PROXY_PID=""
 
 hide_web_token() {
-    # Only swap if we aren't already in proxy mode
-    if [ ! -f "$STATE_FLAG" ]; then
-        echo "🛡️  Switching to Proxy Profile..."
-        
-        # 1. Save the official Anthropic login safely
-        [ -f "$AUTH_FILE" ] && mv "$AUTH_FILE" "$AUTH_FILE.real"
-        [ -d "$AUTH_DIR" ] && mv "$AUTH_DIR" "$AUTH_DIR.real"
-
-        # 2. Load the Proxy memory if it exists. 
-        # (If it doesn't exist, Claude stays blank and asks for setup)
-        [ -f "$AUTH_FILE.proxy" ] && mv "$AUTH_FILE.proxy" "$AUTH_FILE"
-        [ -d "$AUTH_DIR.proxy" ] && mv "$AUTH_DIR.proxy" "$AUTH_DIR"
-
-        touch "$STATE_FLAG"
-    fi
+    echo "🛡️  Temporarily hiding official Claude session to prevent conflicts..."
+    [ -f "$AUTH_FILE" ] && mv "$AUTH_FILE" "$AUTH_HIDDEN"
+    [ -d "$AUTH_DIR" ] && mv "$AUTH_DIR" "$AUTH_DIR_HIDDEN"
 }
 
 restore_web_token() {
-    # Only restore if we are currently in proxy mode
-    if [ -f "$STATE_FLAG" ]; then
-        echo "🔓 Saving setup and restoring Official Claude session..."
-        
-        # 1. Snapshot the current state! 
-        # (When you exit Claude, this permanently saves your Yes/No choice)
-        [ -f "$AUTH_FILE" ] && mv "$AUTH_FILE" "$AUTH_FILE.proxy"
-        [ -d "$AUTH_DIR" ] && mv "$AUTH_DIR" "$AUTH_DIR.proxy"
-
-        # 2. Restore the official Anthropic login
-        [ -f "$AUTH_FILE.real" ] && mv "$AUTH_FILE.real" "$AUTH_FILE"
-        [ -d "$AUTH_DIR.real" ] && mv "$AUTH_DIR.real" "$AUTH_DIR"
-
-        rm -f "$STATE_FLAG"
-    fi
+    echo "🔓 Restoring official Claude session..."
+    [ -f "$AUTH_HIDDEN" ] && mv "$AUTH_HIDDEN" "$AUTH_FILE"
+    [ -d "$AUTH_DIR_HIDDEN" ] && mv "$AUTH_DIR_HIDDEN" "$AUTH_DIR"
 }
 
 cleanup() {
@@ -56,7 +33,6 @@ trap cleanup EXIT
 # ==========================================
 # 1. LOAD API KEYS
 # ==========================================
-# Load from the installer's .env file
 if [ -f "$HOME/.claude-rotator/.env" ]; then
     set -a; source "$HOME/.claude-rotator/.env"; set +a
 else
