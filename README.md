@@ -12,35 +12,33 @@ By default, Anthropic's Claude Code locks you into their ecosystem. This tool us
 
 - Noob-Friendly Installer: Sets up everything, including the virtual environment and global terminal aliases, with one command.
 
+.
+
 ## 🚀 1-Click Installation (Recommended)
-You don't need to manually configure Python environments or edit configuration files. Just open your terminal and paste this single command:
+Open your terminal and paste this command:
 
 ```Bash
-curl -sSL https://github.com/BheeshamKS/ClaudeCode-Model-Rotator/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/BheeshamKS/ClaudeCode-Model-Rotator/main/install.sh | bash
 ```
 
-During installation:
+### During installation:
 
-- The script will download the core files.
+- The script downloads core files and checks for Ollama.
 
-- It will ask you to paste your OpenRouter API Key.
+- It will ask for your OpenRouter API Key (Get it free at openrouter.ai).
 
-- It will quietly build the translation proxy in the background.
-
-- Once it finishes, just restart your terminal!
+- It builds the translation proxy and sets up the claude-rotator command.
 
 ## 💻 How to Use
-Whenever you want to start coding, just open your terminal in your project folder and type:
+Type this in any project folder:
 
 ```Bash
 claude-rotator
 ```
-You will be greeted with an interactive menu to select your provider and model.
+⚠️ IMPORTANT: Authentication & Setup
+Ignore the Auth Error: If you see a warning about authentication or "sk-ant-dummy" during the first run, it is nothing to worry about. This is a necessary part of how the proxy intercepts the request. Everything works fine.
 
-⚠️ IMPORTANT: The "Dummy Key" Prompt
-When you select OpenRouter, Claude Code will pop up a security warning asking if you want to use a custom API key called sk-ant-dummy.
-
-You MUST select 1. Yes. This is a fake key we use to trick Claude into opening its doors. Once you hit Yes, our hidden proxy catches the fake key, throws it in the trash, attaches your real OpenRouter key, and connects you to the free models!
+First-Time Setup: When you use a new provider, Claude might ask you to choose a theme or confirm a custom API key. Just follow the prompts (select 1. Yes for custom keys) and you'll be dropped into the terminal.
 
 ## 🤖 Supported Models
 This rotator is pre-configured with the best free coding models currently available that can handle Claude Code's massive background tool payloads.
