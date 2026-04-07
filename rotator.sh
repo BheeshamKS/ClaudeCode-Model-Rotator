@@ -16,14 +16,10 @@ hide_web_token() {
         [ -f "$AUTH_FILE" ] && mv "$AUTH_FILE" "$AUTH_FILE.real"
         [ -d "$AUTH_DIR" ] && mv "$AUTH_DIR" "$AUTH_DIR.real"
 
-        # 2. Load the Proxy memory OR create a fake one to skip the Yes/No prompt
-        if [ -f "$AUTH_FILE.proxy" ]; then
-            mv "$AUTH_FILE.proxy" "$AUTH_FILE"
-            [ -d "$AUTH_DIR.proxy" ] && mv "$AUTH_DIR.proxy" "$AUTH_DIR"
-        else
-            # Inject a fake pre-approved key so Claude bypasses login AND the prompt!
-            echo '{"customApiKey":"sk-ant-dummy"}' > "$AUTH_FILE"
-        fi
+        # 2. Load the Proxy memory if it exists
+        # (If it doesn't exist, Claude will ask for 'Yes/No' once and then we save it!)
+        [ -f "$AUTH_FILE.proxy" ] && mv "$AUTH_FILE.proxy" "$AUTH_FILE"
+        [ -d "$AUTH_DIR.proxy" ] && mv "$AUTH_DIR.proxy" "$AUTH_DIR"
 
         touch "$STATE_FLAG"
     fi
@@ -33,7 +29,7 @@ restore_web_token() {
     if [ -f "$STATE_FLAG" ]; then
         echo "🔓 Restoring Official Claude session..."
         
-        # 1. Save current proxy state
+        # 1. Save current proxy state (This permanently saves your 'Yes' choice!)
         [ -f "$AUTH_FILE" ] && mv "$AUTH_FILE" "$AUTH_FILE.proxy"
         [ -d "$AUTH_DIR" ] && mv "$AUTH_DIR" "$AUTH_DIR.proxy"
 
