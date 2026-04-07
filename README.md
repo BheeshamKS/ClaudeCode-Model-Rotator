@@ -14,7 +14,9 @@ By default, Anthropic's Claude Code locks you into their ecosystem. This tool us
 
 .
 
-## 🚀 1-Click Installation (Recommended)
+##🐧 OS Support: Native Linux (Ubuntu/Debian) or Windows via WSL2.
+### 🚀 1-Click Installation (Recommended)
+
 Open your terminal and paste this command:
 
 ```Bash
