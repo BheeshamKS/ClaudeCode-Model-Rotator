@@ -1,28 +1,29 @@
 #!/bin/bash
 
 # ==========================================
-# 0. AUTH & PROXY MANAGEMENT
+# 0. PROXY MANAGEMENT & SURGICAL AUTH
 # ==========================================
-AUTH_FILE="$HOME/.claude.json"
-AUTH_HIDDEN="$HOME/.claude.json.hidden"
-AUTH_DIR="$HOME/.claude"
-AUTH_DIR_HIDDEN="$HOME/.claude.hidden"
 PROXY_PID=""
 
-hide_web_token() {
-    echo "🛡️  Temporarily hiding official Claude session to prevent conflicts..."
-    [ -f "$AUTH_FILE" ] && mv "$AUTH_FILE" "$AUTH_HIDDEN"
-    [ -d "$AUTH_DIR" ] && mv "$AUTH_DIR" "$AUTH_DIR_HIDDEN"
-}
-
-restore_web_token() {
-    echo "🔓 Restoring official Claude session..."
-    [ -f "$AUTH_HIDDEN" ] && mv "$AUTH_HIDDEN" "$AUTH_FILE"
-    [ -d "$AUTH_DIR_HIDDEN" ] && mv "$AUTH_DIR_HIDDEN" "$AUTH_DIR"
+# SURGICAL STRIKE: Instead of hiding the whole config file (which causes Claude 
+# to delete the OS Keychain token), we use Node.js to surgically delete ONLY 
+# the dummy key right before you want to use the Official Web Login.
+clear_custom_keys() {
+    if command -v node &> /dev/null; then
+        node -e '
+        const fs = require("fs");
+        const file = process.env.HOME + "/.claude.json";
+        if (fs.existsSync(file)) {
+            try {
+                const data = JSON.parse(fs.readFileSync(file));
+                delete data.customApiKey;
+                fs.writeFileSync(file, JSON.stringify(data, null, 2));
+            } catch(e) {}
+        }'
+    fi
 }
 
 cleanup() {
-    restore_web_token
     if [ -n "$PROXY_PID" ]; then
         echo "🛑 Shutting down LiteLLM proxy..."
         kill $PROXY_PID 2>/dev/null
@@ -69,14 +70,15 @@ echo "-------------------------------------------"
 echo "1) Official Claude (Anthropic Web)"
 echo "2) Ollama Cloud"
 echo "3) OpenRouter (via LiteLLM Proxy)"
-echo "4) 🛠️  Fix Auth Conflict (Restore Web Token)"
+echo "4) 🛠️  Clear Custom API Keys (Restore Web Login)"
 echo "5) Exit"
 read -p "Select Provider [1-5]: " provider_choice
 
 case $provider_choice in
     1)
         echo -e "\n🚀 Launching Official Claude..."
-        restore_web_token
+        # Surgically remove the dummy key so it falls back to your OS Keychain web login
+        clear_custom_keys
         unset ANTHROPIC_BASE_URL
         unset ANTHROPIC_API_KEY
         claude
@@ -95,7 +97,7 @@ case $provider_choice in
         select model in "${OLLAMA_MODELS[@]}"; do
             if [[ -n $model ]]; then
                 echo -e "\n🚀 Launching Ollama Cloud: $model"
-                restore_web_token
+                clear_custom_keys
                 unset ANTHROPIC_BASE_URL
                 unset ANTHROPIC_API_KEY
                 ollama launch claude --model "$model"
@@ -110,7 +112,6 @@ case $provider_choice in
         select model in "${OPENROUTER_MODELS[@]}"; do
             if [[ -n $model ]]; then
                 echo -e "\n⚙️  Configuring Proxy Firewall..."
-                hide_web_token
                 
                 if [[ "$model" != openrouter/* ]]; then
                     target_model="openrouter/$model"
@@ -143,8 +144,8 @@ EOF
         done
         ;;
     4)
-        restore_web_token
-        echo "✅ Official Claude login restored."
+        clear_custom_keys
+        echo "✅ Custom keys cleared. Your Official Claude login is ready."
         ;;
     5)
         exit 0
