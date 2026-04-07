@@ -71,3 +71,10 @@ If you ever manually force-quit the terminal and the rotator didn't have time to
 
 "Where are my API keys saved?"
 The installer securely saves your API keys in a hidden file located at `~/.claude-rotator/.env.` You can edit this file anytime if you need to update your OpenRouter key.
+
+## How to Uninstall the Tool completely
+
+run
+```Bash
+curl -sSL https://github.com/BheeshamKS/ClaudeCode-Model-Rotator/uninstall.sh | bash
+```
