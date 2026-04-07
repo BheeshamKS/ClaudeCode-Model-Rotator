@@ -14,7 +14,7 @@ chmod +x "$INSTALL_DIR/rotator.sh"
 echo ""
 echo "🔑 Let's set up your OpenRouter API Key."
 echo "   (You can get a free one at https://openrouter.ai/keys)"
-read -p "Paste your OPENROUTER_API_KEY: " user_api_key
+read -p "Paste your OPENROUTER_API_KEY: " user_api_key </dev/tty
 
 echo "OPENROUTER_API_KEY=\"$user_api_key\"" > "$INSTALL_DIR/.env"
 echo "✅ Key saved securely."
