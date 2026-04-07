@@ -1,24 +1,47 @@
 #!/bin/bash
 
 # ==========================================
-# 0. AUTH & PROXY MANAGEMENT
+# 0. AUTH & PROXY MANAGEMENT ("PROFILE SWAPPER")
 # ==========================================
 AUTH_FILE="$HOME/.claude.json"
-AUTH_HIDDEN="$HOME/.claude.json.hidden"
 AUTH_DIR="$HOME/.claude"
-AUTH_DIR_HIDDEN="$HOME/.claude.hidden"
+STATE_FLAG="$HOME/.claude-rotator.active"
 PROXY_PID=""
 
 hide_web_token() {
-    echo "🛡️  Temporarily hiding official Claude session to prevent conflicts..."
-    [ -f "$AUTH_FILE" ] && mv "$AUTH_FILE" "$AUTH_HIDDEN"
-    [ -d "$AUTH_DIR" ] && mv "$AUTH_DIR" "$AUTH_DIR_HIDDEN"
+    # Only swap if we aren't already in proxy mode
+    if [ ! -f "$STATE_FLAG" ]; then
+        echo "🛡️  Switching to Proxy Profile..."
+        
+        # 1. Save the official Anthropic login safely
+        [ -f "$AUTH_FILE" ] && mv "$AUTH_FILE" "$AUTH_FILE.real"
+        [ -d "$AUTH_DIR" ] && mv "$AUTH_DIR" "$AUTH_DIR.real"
+
+        # 2. Load the Proxy memory if it exists. 
+        # (If it doesn't exist, Claude stays blank and asks for setup)
+        [ -f "$AUTH_FILE.proxy" ] && mv "$AUTH_FILE.proxy" "$AUTH_FILE"
+        [ -d "$AUTH_DIR.proxy" ] && mv "$AUTH_DIR.proxy" "$AUTH_DIR"
+
+        touch "$STATE_FLAG"
+    fi
 }
 
 restore_web_token() {
-    echo "🔓 Restoring official Claude session..."
-    [ -f "$AUTH_HIDDEN" ] && mv "$AUTH_HIDDEN" "$AUTH_FILE"
-    [ -d "$AUTH_DIR_HIDDEN" ] && mv "$AUTH_DIR_HIDDEN" "$AUTH_DIR"
+    # Only restore if we are currently in proxy mode
+    if [ -f "$STATE_FLAG" ]; then
+        echo "🔓 Saving setup and restoring Official Claude session..."
+        
+        # 1. Snapshot the current state! 
+        # (When you exit Claude, this permanently saves your Yes/No choice)
+        [ -f "$AUTH_FILE" ] && mv "$AUTH_FILE" "$AUTH_FILE.proxy"
+        [ -d "$AUTH_DIR" ] && mv "$AUTH_DIR" "$AUTH_DIR.proxy"
+
+        # 2. Restore the official Anthropic login
+        [ -f "$AUTH_FILE.real" ] && mv "$AUTH_FILE.real" "$AUTH_FILE"
+        [ -d "$AUTH_DIR.real" ] && mv "$AUTH_DIR.real" "$AUTH_DIR"
+
+        rm -f "$STATE_FLAG"
+    fi
 }
 
 cleanup() {
