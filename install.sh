@@ -18,10 +18,17 @@ fi
 INSTALL_DIR="$HOME/.claude-rotator"
 mkdir -p "$INSTALL_DIR"
 
-# 2. Download the main script directly from GitHub
-echo "📥 Downloading core scripts..."
-curl -sSL "https://raw.githubusercontent.com/BheeshamKS/ClaudeCode-Model-Rotator/main/rotator.sh" -o "$INSTALL_DIR/rotator.sh"
-chmod +x "$INSTALL_DIR/rotator.sh"
+# 2. Install from local file or GitHub
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/rotator.sh" ]; then
+    echo "📥 Installing from local files..."
+    cp "$SCRIPT_DIR/rotator.sh" "$INSTALL_DIR/rotator.sh"
+    chmod +x "$INSTALL_DIR/rotator.sh"
+else
+    echo "📥 Downloading core scripts from GitHub..."
+    curl -sSL "https://raw.githubusercontent.com/BheeshamKS/ClaudeCode-Model-Rotator/main/rotator.sh" -o "$INSTALL_DIR/rotator.sh"
+    chmod +x "$INSTALL_DIR/rotator.sh"
+fi
 
 # 3. Ask the user for their API key
 echo ""

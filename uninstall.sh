@@ -1,3 +1,8 @@
+#!/bin/bash
+
+echo "🗑️  Uninstalling Claude Code Multi-Provider Rotator..."
+echo "==================================================="
+
 # 1. Clear custom API keys from Claude config (restore web login)
 if command -v node &> /dev/null; then
     node -e '
