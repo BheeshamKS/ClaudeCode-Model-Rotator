@@ -3,6 +3,17 @@
 echo "🚀 Installing Claude Code Multi-Provider Rotator..."
 echo "==================================================="
 
+# Pre-flight dependency checks
+if ! command -v curl &> /dev/null; then
+    echo "❌ curl is not installed. Please install curl first."
+    exit 1
+fi
+
+if ! command -v python3 &> /dev/null; then
+    echo "❌ python3 is not installed. Please install python3 first."
+    exit 1
+fi
+
 # 1. Create a hidden installation directory
 INSTALL_DIR="$HOME/.claude-rotator"
 mkdir -p "$INSTALL_DIR"
@@ -47,15 +58,22 @@ fi
 # 5. Automate the Python Virtual Environment & LiteLLM proxy
 echo ""
 echo "📦 Installing LiteLLM Proxy in the background (this may take a few minutes)..."
-python3 -m venv "$HOME/.litellm_env"
-"$HOME/.litellm_env/bin/pip" install --upgrade pip > /dev/null 2>&1
-"$HOME/.litellm_env/bin/pip" install 'litellm[proxy]' > /dev/null 2>&1
+python3 -m venv "$HOME/.litellm_env" || { echo "❌ Failed to create virtual environment."; exit 1; }
+"$HOME/.litellm_env/bin/pip" install --upgrade pip > /dev/null 2>&1 || { echo "❌ Failed to upgrade pip."; exit 1; }
+if ! "$HOME/.litellm_env/bin/pip" install 'litellm[proxy]' > /dev/null 2>&1; then
+    echo "❌ Failed to install LiteLLM proxy. Check pip logs for details."
+    exit 1
+fi
 echo "✅ Proxy installed successfully."
 
 # 6. Create a global command alias in the user's bash profile
 BASH_RC="$HOME/.bashrc"
-if ! grep -q "alias claude-rotator=" "$BASH_RC"; then
-    echo "alias claude-rotator='$INSTALL_DIR/rotator.sh'" >> "$BASH_RC"
+if [ -f "$BASH_RC" ]; then
+    if ! grep -q "alias claude-rotator=" "$BASH_RC"; then
+        echo "alias claude-rotator='$INSTALL_DIR/rotator.sh'" >> "$BASH_RC"
+    fi
+else
+    echo "⚠️  ~/.bashrc not found. Alias not added."
 fi
 
 echo ""
