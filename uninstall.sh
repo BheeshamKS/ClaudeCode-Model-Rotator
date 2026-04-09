@@ -22,10 +22,23 @@ rm -rf ~/.claude-rotator
 rm -rf ~/.litellm_env
 rm -f ~/.litellm_config.yaml
 
-# 3. Remove the alias from their bash profile
-if [ -f ~/.bashrc ]; then
-    sed -i '/alias claude-rotator/d' ~/.bashrc
+# 3. Remove the alias from shell profile
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS uses zsh by default
+    SHELL_RC="$HOME/.zshrc"
+    SED_INPLACE=(-i '')
+else
+    SHELL_RC="$HOME/.bashrc"
+    SED_INPLACE=(-i)
+fi
+
+if [ -f "$SHELL_RC" ]; then
+    sed "${SED_INPLACE[@]}" '/alias claude-rotator/d' "$SHELL_RC"
 fi
 
 echo "🗑️ Claude Code Rotator has been completely removed."
-echo "   Restart your terminal or run: source ~/.bashrc"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo "   Restart your terminal or run: source ~/.zshrc"
+else
+    echo "   Restart your terminal or run: source ~/.bashrc"
+fi

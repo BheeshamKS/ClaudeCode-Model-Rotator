@@ -73,21 +73,26 @@ if ! "$HOME/.litellm_env/bin/pip" install 'litellm[proxy]' > /dev/null 2>&1; the
 fi
 echo "✅ Proxy installed successfully."
 
-# 6. Create a global command alias in the user's bash profile
-BASH_RC="$HOME/.bashrc"
-if [ -f "$BASH_RC" ]; then
-    if ! grep -q "alias claude-rotator=" "$BASH_RC"; then
-        echo "alias claude-rotator='$INSTALL_DIR/rotator.sh'" >> "$BASH_RC"
+# 6. Create a global command alias in the user's shell profile
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    SHELL_RC="$HOME/.zshrc"
+else
+    SHELL_RC="$HOME/.bashrc"
+fi
+
+if [ -f "$SHELL_RC" ]; then
+    if ! grep -q "alias claude-rotator=" "$SHELL_RC"; then
+        echo "alias claude-rotator='$INSTALL_DIR/rotator.sh'" >> "$SHELL_RC"
     fi
 else
-    echo "⚠️  ~/.bashrc not found. Alias not added."
+    echo "⚠️  $SHELL_RC not found. Alias not added."
 fi
 
 echo ""
 echo "🎉 Installation Complete!"
 echo "==================================================="
 echo "To finish setup, restart your terminal or run:"
-echo "  source ~/.bashrc"
+echo "  source $SHELL_RC"
 echo ""
 echo "Then, start coding anytime by typing:"
 echo "  claude-rotator"

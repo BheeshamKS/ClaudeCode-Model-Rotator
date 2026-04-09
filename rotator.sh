@@ -21,8 +21,10 @@ clear_custom_keys() {
 }
 
 cleanup() {
+    show_cursor
+    tput sgr0
+    tput rmcup
     if [ -n "$PROXY_PID" ]; then
-        echo "🛑 Shutting down LiteLLM proxy..."
         kill $PROXY_PID 2>/dev/null
     fi
 }
@@ -54,15 +56,6 @@ OPENROUTER_MODELS=(
 # ==========================================
 # 3. TUI MENU WITH ARROW KEY NAVIGATION
 # ==========================================
-
-# Terminal setup
-cleanup_tui() {
-    show_cursor
-    tput sgr0
-    tput rmcup  # Exit alternate screen
-}
-trap cleanup_tui EXIT
-trap cleanup EXIT
 
 hide_cursor() { tput civis; }
 show_cursor() { tput cnorm; }
