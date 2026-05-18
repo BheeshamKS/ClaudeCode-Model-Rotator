@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash install.sh)",
+      "Bash(chmod +x /home/bheesham/Coding-In-Linux/Projects/ClaudeCode-Model-Rotator/uninstall.sh)",
+      "Bash(bash /home/bheesham/Coding-In-Linux/Projects/ClaudeCode-Model-Rotator/uninstall.sh)",
+      "Read(//home/bheesham/.claude-rotator/**)"
+    ]
+  }
+}
